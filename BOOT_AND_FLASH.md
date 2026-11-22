@@ -92,6 +92,21 @@ to relock.
 
 ## 2. Build the image
 
+On the machine that already has the build tree, everything in sections 2 and 3
+can be done by one script (absolute paths, no `cd` needed):
+
+```bash
+/home/bklumki/waipu-twrp-device-tree/build_image.sh
+# or, if boot.img already exists and only the AVB footer must be reattached:
+/home/bklumki/waipu-twrp-device-tree/build_image.sh --avb-only
+```
+
+The script cleans the ramdisk cache, makes sure `libminuitwrp.so` is registered,
+runs `mka bootimage -j4`, reattaches the AVB footer and prints the resulting
+SHA-256. It also works when started from any directory.
+
+Manual steps, if you prefer to do it yourself:
+
 ```sh
 mkdir twrp11 && cd twrp11
 repo init -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git \
