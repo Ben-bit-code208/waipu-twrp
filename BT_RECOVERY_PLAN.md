@@ -51,6 +51,61 @@ vendor/etc/bluetooth/bt_vendor.conf        271 B
 verweist darauf, aber das Modul ist nicht ausgeliefert. Die Init-Skizze unten
 lässt es deshalb weg.
 
+## Konkretes HCI-Bring-up (zweite Recherche, 2026-11-22)
+
+Aus `vendor.img` extrahierte Init-Regeln und Modul-Aliase:
+
+- `btmtksdio.ko` hat die SDIO-Aliase `v037Ad7663` (Funktion 2) und keine
+  Modulparameter. Es wird über `vendor.sys.mtkbtdriver=true` geladen.
+- `wlan_mt7663_sdio.ko` hat den Alias `v037Ad7603` (Funktion 1, WLAN).
+- `sdio_bt.ko` hat nur den Parameter `chip_name`; der Stock übergibt **keinen**
+  Wert. `aml_sdio.ko` fehlt, seine Symbole sind teils fest im Kernel.
+- **`btmtksdio.ko` fordert `bt.cfg` an, nicht `bt_mt7663.cfg`.** Beide liegen
+  in `vendor.img`, sind aber **nicht** bytegleich:
+  `RESET_STACK_AFTER_WOBLE` ist `1` in `bt.cfg` und `0` in `bt_mt7663.cfg`.
+  Deshalb die echte `bt.cfg` aus dem Dump verwenden, nicht umbenennen.
+- Weitere `request_firmware()`-Namen: `mt7663_patch_e2_hdr.bin`,
+  `EEPROM_MT7663.bin`, `wifi.cfg`, `woble_setting_7663.bin`,
+  `WIFI_RAM_CODE_MT7663.bin`, `TxPwrLimit_MT76x8.dat`.
+
+Die benötigten Dateien liegen jetzt lokal unter
+`/home/bklumki/fw_dump/bt_recovery_firmware/` (nicht im öffentlichen Repo).
+
+Reihenfolge in der Recovery (Stock-Props nur setzen, keine Stock-RC importieren,
+sonst doppelte `insmod`s):
+
+```sh
+mkdir -p /vendor/firmware /vendor/lib/modules /data/misc/bluetooth
+chmod 0666 /dev/uhid
+echo -n /vendor/firmware > /sys/module/firmware_class/parameters/path
+
+insmod /vendor/lib/modules/wlan_mt7663_sdio.ko   # WLAN/RAM-Patch zuerst
+sleep 2
+insmod /vendor/lib/modules/sdio_bt.ko            # darf an unresolved symbols scheitern
+insmod /vendor/lib/modules/btmtksdio.ko          # -> hci0
+
+setprop vendor.sys.amlbtsdiodriver true
+setprop vendor.sys.mtkbtdriver true
+setprop persist.vendor.bt_module btmtksdio
+```
+
+Erfolgskriterium und Diagnose:
+
+```sh
+ls -l /sys/class/bluetooth/hci0
+cat /sys/class/bluetooth/hci0/address
+for d in /sys/bus/sdio/devices/*; do cat "$d/uevent"; done   # 037A:7603 + 037A:7663
+dmesg | grep -iE 'btmtk|sdio|wmt|firmware|hci0|mmc2'
+```
+
+Wichtige Logzeilen: `request_firmware(... mt7663_patch_e2_hdr.bin)`,
+`patch downoad finish`, `set driver own success`, `hci0`.
+Der ROM-Patch wird via WMT geteilt mit WLAN geladen – wenn WLAN den Patch
+hält, kann BT mit `Firmware already downloaded` / `wmt command timed out`
+scheitern; dann beide Module entladen und WLAN → BT erneut laden.
+`bt_vendor.conf` zeigt auf `/dev/ttyS1` und ist die **UART**-Variante – nicht
+als Vorlage für SDIO nutzen.
+
 **Hinweis:** Das sind proprietäre Vendor-Blobs. Nur lokal zum Bauen nutzen,
 nicht in ein öffentliches XDA-Attachment legen.
 
