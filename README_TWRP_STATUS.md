@@ -27,7 +27,8 @@ Das ist ein **Ausgangspunkt**, kein fertiger Port.
   (u. a. `TeamWin/android_bootable_recovery` und `vendor/twrp`).
 - Device-Tree im Source-Tree: `/mnt/twrp-build/twrp11/device/sei/SEI700WP`.
 - Build-Skript: `/mnt/twrp-build/twrp11/build_twrp.sh`
-  (`lunch twrp_SEI700WP-eng`, `mka recoveryimage`).
+  (`lunch twrp_SEI700WP-eng`, `mka recoveryimage -j4`).
+- GitHub-Repo (nur Device-Tree): https://github.com/Ben-bit-code208/waipu-twrp
 - Source-Sync läuft mit `repo sync -j4 --no-clone-bundle --fail-fast`
   (Log: `/mnt/twrp-build/twrp11/repo-sync.log`).
 
@@ -65,6 +66,11 @@ Das ist ein **Ausgangspunkt**, kein fertiger Port.
    `vendor/omni/config/common.mk` → `vendor/twrp/config/common.mk`.
 5. `recovery.fstab` um dynamische Partitionen, `boot_a`, `vendor_boot_a`,
    `dtbo_a` und `super` ergänzt.
+6. Für den ersten Boot-Test: veraltetes `PRODUCT_STATIC_BOOT_CONTROL_HAL`
+   und das nicht existierende `bootctrl.SEI700WP` entfernt,
+   `AB_OTA_UPDATER := false` und `BOARD_AVB_ENABLE := false` gesetzt.
+   Grund: im TWRP-11-Tree gibt es kein passendes bootctrl-HAL. A/B-Slotwechsel
+   und AVB müssen später nachgerüstet werden.
 
 ## Fernbedienung (Zulip-Frage)
 
@@ -100,8 +106,8 @@ Die dafür nötigen BT-Blobs und Keylayouts liegen bereits unter
 ## Offene Punkte vor dem Build
 
 - Source-Sync abschließen (läuft).
-- `bootctrl.SEI700WP`, `android.hardware.boot@1.0-impl` und
-  `vendor/twrp/config/common.mk` nach dem Sync prüfen.
+- `vendor/twrp/config/common.mk` ist synchronisiert und geprüft.
+- `bootctrl.SEI700WP` existiert nicht – A/B vorerst deaktiviert (siehe oben).
 - `BOARD_SUPER_PARTITION_*`, `PLATFORM_VERSION := 16.1.0` validieren.
 - Display-Module (`aml_drm.ko` etc.) ggf. in die Recovery-Ramdisk legen.
 - BT laut `BT_RECOVERY_PLAN.md`: zuerst HCI-Bring-up (`hci0`), dann Brücke.
