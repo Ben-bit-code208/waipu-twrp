@@ -17,6 +17,27 @@ procedure in `BOOT_AND_FLASH.md`. Slot `b` is broken – use slot `a` only.
 | Kernel | `5.4.242-ab6958` (prebuilt, gzip blob from stock `boot.img`) |
 | Recovery | recovery-as-boot, no separate `recovery` partition |
 
+## Prebuilt image
+
+If you do not want to build yourself, a ready-to-flash image is attached to the
+[latest release](https://github.com/Ben-bit-code208/waipu-twrp/releases/latest):
+
+| | |
+|---|---|
+| Asset | `twrp_SEI700WP_boot_poweroffhook_avb.img` |
+| SHA-256 | `31295c621d702c655064ea765d587f2ac85c0bc95af5c126176878a14dfc8704` |
+| Target | slot `a` only (`/dev/block/by-name/boot_a`) |
+| TWRP | `3.7.0_11-0`, fbdev graphics, ADB enabled |
+
+The AVB footer is already reattached. Skip sections 2 and 3 of
+`BOOT_AND_FLASH.md` and go straight to section 4. Verify the hash before
+flashing:
+
+```sh
+sha256sum twrp_SEI700WP_boot_poweroffhook_avb.img
+# 31295c621d702c655064ea765d587f2ac85c0bc95af5c126176878a14dfc8704
+```
+
 ## Status / details
 
 - `BOOT_AND_FLASH.md` – OEM unlock, build, AVB footer, flashing and boot tests

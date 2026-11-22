@@ -27,6 +27,28 @@ All commands below were tested on:
 
 ---
 
+## Prebuilt image (skip sections 2 and 3)
+
+A ready-to-flash image is attached to the
+[latest release](https://github.com/Ben-bit-code208/waipu-twrp/releases/latest).
+Use it if you do not want to build locally; the AVB footer is already reattached.
+
+```
+twrp_SEI700WP_boot_poweroffhook_avb.img
+SHA-256: 31295c621d702c655064ea765d587f2ac85c0bc95af5c126176878a14dfc8704
+```
+
+Verify it on the PC before pushing it to the device:
+
+```bash
+sha256sum twrp_SEI700WP_boot_poweroffhook_avb.img
+# 31295c621d702c655064ea765d587f2ac85c0bc95af5c126176878a14dfc8704
+```
+
+It targets slot `a` only. If the hash matches, continue with section 4.
+
+---
+
 ## 1. OEM unlock (one time)
 
 `fastboot oem ...` does not work in U-Boot fastboot – every variant returns
