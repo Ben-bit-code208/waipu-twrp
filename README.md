@@ -20,7 +20,7 @@ procedure in `BOOT_AND_FLASH.md`. Slot `b` is broken – use slot `a` only.
 ## Prebuilt image
 
 If you do not want to build yourself, a ready-to-flash image is attached to the
-[latest release](https://github.com/Ben-bit-code208/waipu-twrp/releases/latest):
+[release 0.0.1](https://github.com/Ben-bit-code208/waipu-twrp/releases/tag/0.0.1):
 
 | | |
 |---|---|

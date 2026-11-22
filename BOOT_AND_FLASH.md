@@ -30,7 +30,7 @@ All commands below were tested on:
 ## Prebuilt image (skip sections 2 and 3)
 
 A ready-to-flash image is attached to the
-[latest release](https://github.com/Ben-bit-code208/waipu-twrp/releases/latest).
+[release 0.0.1](https://github.com/Ben-bit-code208/waipu-twrp/releases/tag/0.0.1).
 Use it if you do not want to build locally; the AVB footer is already reattached.
 
 ```
