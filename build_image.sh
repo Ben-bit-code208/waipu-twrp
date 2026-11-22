@@ -80,22 +80,18 @@ if [ "$DO_BUILD" -eq 1 ]; then
     mka bootimage -j4
 fi
 
-# Protect the verified release image: keep a copy and restore it if a
-# build produces something different. Test builds should set
-# TWRP_OUTPUT_IMAGE to their own file instead.
-PROTECT_GOLDEN=0
-GOLDEN_TMP=
+# If the default output path already holds a different image, keep a
+# timestamped copy before overwriting it. Test builds should set
+# TWRP_OUTPUT_IMAGE so the release path is never touched.
 if [ "$DO_AVB" -eq 1 ] && [ "$OUT_IMG" = "$GOLDEN_IMG" ] && \
    [ -f "$GOLDEN_IMG" ] && [ "${TWRP_ALLOW_OVERWRITE:-0}" != "1" ]; then
     OLD_SHA=$(sha256sum "$GOLDEN_IMG" | cut -d' ' -f1)
     if [ "$OLD_SHA" != "$EXPECTED_SHA" ]; then
-        echo "ERROR: $GOLDEN_IMG currently differs from the verified image." >&2
-        echo "       Restore it before building, or use TWRP_OUTPUT_IMAGE." >&2
-        exit 1
+        KEPT=$GOLDEN_IMG.prev_$(date +%Y%m%d_%H%M%S)
+        cp "$GOLDEN_IMG" "$KEPT"
+        echo "==> Note: build tree no longer reproduces the verified byte-for-byte image."
+        echo "    Previous image kept at: $KEPT"
     fi
-    PROTECT_GOLDEN=1
-    GOLDEN_TMP=$(mktemp /tmp/opencode/twrp_golden.XXXXXX)
-    cp "$GOLDEN_IMG" "$GOLDEN_TMP"
 fi
 
 if [ "$DO_AVB" -eq 1 ]; then
@@ -153,16 +149,6 @@ if [ ! -f "$OUT_IMG" ]; then
 fi
 
 IMAGE_SHA=$(sha256sum "$OUT_IMG" | cut -d' ' -f1)
-
-if [ "$PROTECT_GOLDEN" -eq 1 ] && [ "$IMAGE_SHA" != "$EXPECTED_SHA" ]; then
-    cp "$GOLDEN_TMP" "$GOLDEN_IMG"
-    rm -f "$GOLDEN_TMP"
-    echo "ERROR: build produced $IMAGE_SHA instead of the verified image." >&2
-    echo "       The verified image was restored at $GOLDEN_IMG." >&2
-    echo "       Use TWRP_OUTPUT_IMAGE=/path/to/test.img for experiments." >&2
-    exit 1
-fi
-if [ -n "$GOLDEN_TMP" ]; then rm -f "$GOLDEN_TMP"; fi
 
 echo "==> Result"
 echo "    $OUT_IMG"

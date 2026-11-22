@@ -106,6 +106,18 @@ The script cleans the ramdisk cache, makes sure `libminuitwrp.so` is registered,
 runs `mka bootimage -j4`, reattaches the AVB footer and prints the resulting
 SHA-256. It also works when started from any directory.
 
+For experiments, write to a different file so the release image is untouched:
+
+```bash
+TWRP_OUTPUT_IMAGE=/home/bklumki/fw_dump/twrp_images/test.img \
+    /home/bklumki/waipu-twrp-device-tree/build_image.sh
+```
+
+A byte-identical copy of the verified 0.0.1 image is kept at
+`/home/bklumki/fw_dump/twrp_images/twrp_SEI700WP_boot_verified_0.0.1.img`.
+If the default output already holds a different image, the script keeps a
+timestamped `.prev_<date>` copy before overwriting it.
+
 The two flash modes require an ADB connection to a device already running TWRP.
 They show the current slot and image hash, ask for `YES`, back up `boot_a` to
 `/home/bklumki/fw_dump/twrp_images/`, push the image to `/tmp` on the device,
