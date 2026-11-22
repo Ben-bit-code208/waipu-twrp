@@ -11,7 +11,8 @@ DEVICE_PATH := device/sei/SEI700WP
 ALLOW_MISSING_DEPENDENCIES := true
 
 # A/B
-AB_OTA_UPDATER := true
+# Disabled for first boot test: no bootctrl.SEI700WP HAL in this tree.
+AB_OTA_UPDATER := false
 AB_OTA_PARTITIONS +=
 BOARD_USES_RECOVERY_AS_BOOT := true
 
@@ -70,8 +71,9 @@ TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
 
 # Verified Boot
-BOARD_AVB_ENABLE := true
-BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3
+# Bootloader is unlocked/secure=no; disable AVB for the first fastboot boot test.
+BOARD_AVB_ENABLE := false
+# BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 3
 
 # Hack: prevent anti rollback
 PLATFORM_SECURITY_PATCH := 2099-12-31

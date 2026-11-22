@@ -6,26 +6,17 @@
 #
 
 LOCAL_PATH := device/sei/SEI700WP
-# A/B
-AB_OTA_POSTINSTALL_CONFIG += \
-    RUN_POSTINSTALL_system=true \
-    POSTINSTALL_PATH_system=system/bin/otapreopt_script \
-    FILESYSTEM_TYPE_system=ext4 \
-    POSTINSTALL_OPTIONAL_system=true
 
-# Boot control HAL
-PRODUCT_PACKAGES += \
-    android.hardware.boot@1.0-impl \
-    android.hardware.boot@1.0-service
+# Dynamic partitions (super_a: system, system_ext, vendor, product, odm)
+PRODUCT_USE_DYNAMIC_PARTITIONS := true
+PRODUCT_TARGET_VNDK_VERSION := 30
+PRODUCT_SHIPPING_API_LEVEL := 30
+PRODUCT_PLATFORM := SEI700WP
 
-PRODUCT_PACKAGES += \
-    bootctrl.SEI700WP
-
-PRODUCT_STATIC_BOOT_CONTROL_HAL := \
-    bootctrl.SEI700WP \
-    libgptutils \
-    libz \
-    libcutils
+# A/B boot control is disabled for the first boot test.
+# The generator referenced bootctrl.SEI700WP, which does not exist in this
+# source tree. Re-enable only after a bootctrl.default alias/HAL is provided.
+# AB_OTA_UPDATER := true
 
 PRODUCT_PACKAGES += \
     otapreopt_script \
