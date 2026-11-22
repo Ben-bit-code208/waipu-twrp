@@ -35,6 +35,10 @@ TARGET_NO_BOOTLOADER := true
 
 # Display
 TARGET_SCREEN_DENSITY := 320
+# Amlogic DRM dumb-buffer mmap is broken in this kernel; use fbdev instead.
+TW_TARGET_USES_DRM := false
+# Do not blank the TV screen after 60 s of inactivity.
+TW_NO_SCREEN_TIMEOUT := true
 
 # Kernel
 BOARD_BOOTIMG_HEADER_VERSION := 3

@@ -130,3 +130,39 @@ fastboot boot boot.img
 Das lädt das Image nur in den RAM. Stock-`boot_a` bleibt unangetastet.
 Vor jedem Flash: bytegleiche Backups von `boot_a` und `vendor_boot_a`
 liegen bereits in `/home/bklumki/fw_dump/`.
+
+## UI-Reparatur (2026-11-22, Headless)
+
+TWRP bootet und ADB/MTP laufen. Die UI zeigte zunächst nur das Waipu-Logo,
+weil `libminuitwrp` beim Amlogic-DRM-`mmap()` abstürzte. Behoben durch:
+
+- `TW_TARGET_USES_DRM := false` (dieses Repo): minuitwrp nutzt jetzt
+  `/dev/graphics/fbdev` statt `/dev/dri/card0`.
+- `TW_NO_SCREEN_TIMEOUT := true` (dieses Repo): kein 60-Sekunden-Blank.
+
+Zwei zusätzliche Patches liegen **nur lokal im AOSP-Build-Tree**, nicht in
+diesem öffentlichen Device-Tree-Repo:
+
+1. `bootable/recovery/minuitwrp/libminuitwrp_defaults.go`
+   `-DHAS_DRM` und `graphics_drm.cpp` werden nur noch bei
+   `TW_TARGET_USES_DRM := true` aktiviert. Sonst wird `graphics_drm.cpp`
+   unabhängig vom Flag einkompiliert und der DRM-Crash bleibt bestehen.
+2. `bootable/recovery/data.cpp`
+   `tw_mount_system_ro` auf `0` und `tw_never_show_system_ro_page` auf `1`
+   setzen, damit der erste „Keep System Read only?“-Dialog nicht erscheint.
+
+Hinweis zum Ramdisk-Cache: Nach Änderung an Dateien in `recovery/root/`
+müssen `ramdisk-recovery.cpio`, `ramdisk-recovery.img` und `boot.img`
+gelöscht und neu gebaut werden. Andernfalls übernimmt `mka bootimage`
+die alten Dateien aus `ramdisk-files.sha256sum`.
+
+Flash auf diesem Gerät: `fastboot boot` wird vom Bootloader ignoriert;
+DNL-Memory-Boot ist blockiert. Getestet wurde stattdessen
+`adb push ... /tmp/`, dann aus dem laufenden TWRP
+`dd if=/tmp/<image> of=/dev/block/by-name/boot_a bs=4M`
+und Prüfung mit `sha256sum /dev/block/by-name/boot_a`.
+
+Letztes getestetes Image: `twrp_SEI700WP_boot_uifix4_avb.img`,
+SHA-256 `1c302a8b0e52eaf04f753383ab05444da5870a6db811a000d363ce634e84a220`.
+Slot `a` ist gesund; Slot `b` bootet auch mit Stock-`boot.img` in eine
+Bootloop und darf nicht verwendet werden.
