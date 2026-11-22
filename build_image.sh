@@ -19,7 +19,10 @@ OUT=$BUILD_ROOT/out/target/product/SEI700WP
 ENV_FILE=$BUILD_ROOT/env.sh
 STOCK_BOOT=/home/bklumki/fw_dump/ota/extracted/boot.img
 IMAGES_DIR=/home/bklumki/fw_dump/twrp_images
-OUT_IMG=$IMAGES_DIR/twrp_SEI700WP_boot_poweroffhook_avb.img
+# TWRP_OUTPUT_IMAGE can point at a different file, e.g. for test builds.
+# The default is the verified release image and is protected below.
+OUT_IMG=${TWRP_OUTPUT_IMAGE:-$IMAGES_DIR/twrp_SEI700WP_boot_poweroffhook_avb.img}
+GOLDEN_IMG=$IMAGES_DIR/twrp_SEI700WP_boot_poweroffhook_avb.img
 EXPECTED_SHA=31295c621d702c655064ea765d587f2ac85c0bc95af5c126176878a14dfc8704
 # In TWRP, /data is not mounted and /data/local/tmp does not exist. Use /tmp.
 DEVICE_IMG=/tmp/twrp_flash.img
@@ -78,6 +81,18 @@ if [ "$DO_BUILD" -eq 1 ]; then
 fi
 
 if [ "$DO_AVB" -eq 1 ]; then
+    # Protect the verified release image from being replaced by a test build.
+    if [ "$OUT_IMG" = "$GOLDEN_IMG" ] && [ -f "$GOLDEN_IMG" ] && \
+       [ "${TWRP_ALLOW_OVERWRITE:-0}" != "1" ]; then
+        OLD_SHA=$(sha256sum "$GOLDEN_IMG" | cut -d' ' -f1)
+        if [ "$OLD_SHA" != "$EXPECTED_SHA" ]; then
+            echo "ERROR: $GOLDEN_IMG currently differs from the verified image." >&2
+            echo "       Refusing to overwrite it. Use TWRP_OUTPUT_IMAGE for test builds" >&2
+            echo "       or TWRP_ALLOW_OVERWRITE=1 if this is intentional." >&2
+            exit 1
+        fi
+    fi
+
     RAW_IMG=$OUT/boot.img
     if [ ! -f "$RAW_IMG" ]; then
         echo "ERROR: no boot.img at $RAW_IMG" >&2
