@@ -102,9 +102,12 @@ abgeschlossen; Details, Blobs und Init-Skizze stehen in **`BT_RECOVERY_PLAN.md`*
 Empfohlen wird eine minimale Mgmt/L2CAP→UHID-Brücke (Fluoride verwerfen,
 BlueZ nur als Option 2). ADB bleibt in jedem Fall der Fallback.
 
-Die dafür nötigen BT-Blobs und Keylayouts liegen bereits unter
-`recovery/root/vendor/...` und `recovery/root/system/usr/keylayout/`
-(nur lokal, nicht für öffentliche XDA-Zips).
+Die Keylayouts liegen unter `recovery/root/system/usr/keylayout/` und
+`recovery/root/vendor/usr/keylayout/`. Die proprietären MT7663-Blobs
+(`vendor/firmware/`, `vendor/lib/modules/`, `vendor/etc/bluetooth/bt_vendor.conf`)
+sind **nicht** Teil dieses öffentlichen Repos (siehe `.gitignore`).
+Für einen lokalen Build müssen sie aus dem eigenen Firmware-Dump nach
+`device/sei/SEI700WP/recovery/root/vendor/` kopiert werden.
 
 ## Offene Punkte nach dem ersten Build
 

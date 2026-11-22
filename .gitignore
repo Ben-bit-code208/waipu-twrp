@@ -1,0 +1,4 @@
+# Proprietary MediaTek Bluetooth blobs (local build only, not published).
+recovery/root/vendor/firmware/
+recovery/root/vendor/lib/modules/
+recovery/root/vendor/etc/bluetooth/bt_vendor.conf
