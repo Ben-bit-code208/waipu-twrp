@@ -26,11 +26,11 @@
 /sdcard            vfat     /dev/block/mmcblk            flags=display=sdcard
 /udisk             auto     /dev/block/sd##              flags=display=udisk
 # Dynamische Partitionen (nur Slot A vorhanden, super_a)
-/system            ext4     /dev/block/mapper/system_a     flags=display=system;backup=1;flashimg=1
-/system_ext        ext4     /dev/block/mapper/system_ext_a flags=display=system_ext;backup=1;flashimg=1
-/vendor            ext4     /dev/block/mapper/vendor_a     flags=display=vendor;backup=1;flashimg=1
-/product           ext4     /dev/block/mapper/product_a    flags=display=product;backup=1;flashimg=1
-/odm               ext4     /dev/block/mapper/odm_a        flags=display=odm;backup=1;flashimg=1
+/system            ext4     /dev/block/mapper/system_a     flags=display=system;backup=1;flashimg=1;ro
+/system_ext        ext4     /dev/block/mapper/system_ext_a flags=display=system_ext;backup=1;flashimg=1;ro
+/vendor            ext4     /dev/block/mapper/vendor_a     flags=display=vendor;backup=1;flashimg=1;ro
+/product           ext4     /dev/block/mapper/product_a    flags=display=product;backup=1;flashimg=1;ro
+/odm               ext4     /dev/block/mapper/odm_a        flags=display=odm;backup=1;flashimg=1;ro
 # Wichtige physische Partitionen für Backup/Restore
 /boot_a            emmc     /dev/block/by-name/boot_a      flags=display=boot_a;backup=1;flashimg=1
 /vendor_boot_a     emmc     /dev/block/by-name/vendor_boot_a flags=display=vendor_boot_a;backup=1;flashimg=1

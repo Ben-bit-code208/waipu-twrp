@@ -44,6 +44,10 @@ on boot
     symlink /dev/block/bootloader1 /dev/block/by-name/bootloader_b
     symlink /dev/dtb /dev/block/by-name/dt_a
     symlink /dev/dtb /dev/block/by-name/dt_b
+    # recovery.fstab maps /boot to /dev/block/boot, but this device only has
+    # boot_a/boot_b. Without this link "twrp backup B" fails with
+    # "Error opening: '' (No such file or directory)".
+    symlink /dev/block/boot_a /dev/block/boot
 
 service console /system/bin/sh
     seclabel u:r:shell:s0

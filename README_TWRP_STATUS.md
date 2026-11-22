@@ -166,3 +166,36 @@ Letztes getestetes Image: `twrp_SEI700WP_boot_uifix4_avb.img`,
 SHA-256 `1c302a8b0e52eaf04f753383ab05444da5870a6db811a000d363ce634e84a220`.
 Slot `a` ist gesund; Slot `b` bootet auch mit Stock-`boot.img` in eine
 Bootloop und darf nicht verwendet werden.
+
+## Backup-/Poweroff-Fixes (2026-11-22)
+
+- `recovery/root/init.recovery.amlogic.rc`
+  Der Symlink `/dev/block/boot -> /dev/block/boot_a` fehlt im Original-Device-Tree.
+  Ohne ihn scheitert `twrp backup B` mit `Error opening: '' (No such file or
+  directory)`, weil `recovery.fstab` `/boot` auf `/dev/block/boot` abbildet, das
+  Gerät aber nur `boot_a`/`boot_b` hat. Damit laufen `twrp backup B <name>` und
+  `twrp restore ... B` zuverlässig (64 MB, Hash vorher/nachher identisch).
+- `recovery/root/system/bin/poweroff.sh`
+  Wird von TWRP in `TWFunc::tw_reboot(rb_poweroff)` über
+  `check_and_run_script()` automatisch aufgerufen. Setzt beim Poweroff
+  `tw_enable_adb=1`, `tw_enable_fastboot=0`, `tw_mount_system_ro=1`,
+  `tw_never_show_system_ro_page=1` und `tw_no_screen_timeout=1`.
+  Der Guard `/tmp/.twrp_poweroff_done` sorgt dafür, dass ein zweiter Aufruf
+  nichts tut. Das Skript ruft bewusst **nicht** selbst `twrp reboot poweroff`
+  auf – sonst würde der Hook rekursiv ausgelöst.
+- `recovery.fstab`
+  `;ro` an den dynamischen Partitionen. Auf diesem Kernel wirkungslos
+  (`EXT4-fs (dm-0): couldn't mount RDWR because of unsupported optional
+  features (4000)`); RO-Manualmount funktioniert, TWRP-CLI mountet aber
+  weiterhin RW. Steht nur zur Dokumentation des Versuchs drin.
+
+Zwei weitere, **nicht in diesem Repo** liegende AOSP-Patches sind im Build-Tree
+aktiv: `bootable/recovery/data.cpp` (`tw_mount_system_ro=1`) und
+`bootable/recovery/partitionmanager.cpp` (`Change_Mount_Read_Only(true)` in
+`Prepare_Super_Volume`). Auch sie konnten den RW-Mountfehler nicht beheben.
+
+Getestetes Image mit Backup-Fix + Poweroff-Hook:
+`twrp_SEI700WP_boot_poweroffhook_avb.img`,
+SHA-256 `31295c621d702c655064ea765d587f2ac85c0bc95af5c126176878a14dfc8704`.
+UUID/Hash geprüft, TWRP bootet nach ~17 s mit `Using fbdev graphics.`,
+Hook manuell ausgeführt und Guard verifiziert.
