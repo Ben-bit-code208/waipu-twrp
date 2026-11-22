@@ -1,0 +1,24 @@
+# MT7663 SDIO Bluetooth files needed for recovery HCI bring-up.
+# Extract from the own device/firmware dump. Not published as blobs.
+vendor/lib/modules/btmtksdio.ko
+vendor/lib/modules/sdio_bt.ko
+vendor/lib/modules/wlan_mt7663_sdio.ko
+vendor/firmware/bt.cfg
+vendor/firmware/EEPROM_MT7663.bin
+vendor/firmware/mt7663_patch_e2_hdr.bin
+vendor/firmware/TxPwrLimit_MT76x8.dat
+vendor/firmware/WIFI_RAM_CODE_MT7663.bin
+vendor/firmware/wifi.cfg
+vendor/firmware/woble_setting.bin
+vendor/firmware/woble_setting_7663.bin
+vendor/usr/keylayout/Vendor_2d01_Product_c006.kl
+
+# HDMI init / IR remote from stock recovery.
+system/bin/systemcontrol_static
+system/usr/keylayout/Vendor_2d01_Product_c006.kl
+sbin/remotecfg
+sbin/remote.cfg
+sbin/remote.tab1
+sbin/remote.tab2
+sbin/remote.tab3
+sbin/recovery.kl
