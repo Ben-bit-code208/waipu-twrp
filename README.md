@@ -3,8 +3,8 @@
 WIP TWRP 11 device tree for the waipu.tv 4K Stick (Amlogic S905Y4, Android 11).
 It was generated with `twrpdtgen` from the stock `boot.img` and then adapted.
 
-**This is not a finished, tested recovery.** Use it only with `fastboot boot`
-until it has been verified on real hardware.
+**This is not a finished, tested recovery.** Boot and flash only with the
+procedure in `BOOT_AND_FLASH.md`. Slot `b` is broken – use slot `a` only.
 
 ## Device
 
@@ -19,6 +19,7 @@ until it has been verified on real hardware.
 
 ## Status / details
 
+- `BOOT_AND_FLASH.md` – OEM unlock, build, AVB footer, flashing and boot tests
 - `README_TWRP_STATUS.md` – port status, build environment, findings
 - `BT_RECOVERY_PLAN.md` – Bluetooth remote research and implementation plan
 
@@ -43,21 +44,20 @@ export ALLOW_MISSING_DEPENDENCIES=true
 
 . build/envsetup.sh
 lunch twrp_SEI700WP-eng
-mka recoveryimage -j"$(nproc)"
+mka bootimage -j"$(nproc)"
 ```
 
-Output: `out/target/product/SEI700WP/recovery.img`
+Output: `out/target/product/SEI700WP/boot.img` (recovery-as-boot).
+The AVB footer must be reattached before flashing; see `BOOT_AND_FLASH.md`.
 
 ## Testing (important)
 
-Do **not** flash directly. Boot the image into RAM only:
+`fastboot boot` is ignored by this device's bootloader, and DNL memory boot is
+blocked. See `BOOT_AND_FLASH.md` for the method that actually works: push the
+image over ADB and write it to `boot_a` from a running TWRP.
 
-```sh
-fastboot boot out/target/product/SEI700WP/recovery.img
-```
-
-If anything goes wrong, simply reboot – the stock `boot_a` partition stays untouched.
-Always keep byte-identical backups of `boot_a` and `vendor_boot_a` before any flashing.
+Always keep byte-identical backups of `boot_a`, `vendor_boot_a` and `misc`
+before any flashing, and never use slot `b`.
 
 ## Notes on included files
 
