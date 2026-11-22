@@ -27,10 +27,13 @@ Das ist ein **Ausgangspunkt**, kein fertiger Port.
   (u. a. `TeamWin/android_bootable_recovery` und `vendor/twrp`).
 - Device-Tree im Source-Tree: `/mnt/twrp-build/twrp11/device/sei/SEI700WP`.
 - Build-Skript: `/mnt/twrp-build/twrp11/build_twrp.sh`
-  (`lunch twrp_SEI700WP-eng`, `mka recoveryimage -j4`).
+  (`lunch twrp_SEI700WP-eng`, `mka bootimage -j4`).
+  **Wichtig:** Bei `BOARD_USES_RECOVERY_AS_BOOT := true` erzeugt TWRP 11
+  kein `recovery.img`; das Recovery-Image heißt
+  `out/target/product/SEI700WP/boot.img`. Das Ziel `recoveryimage` ist
+  in diesem Setup leer.
 - GitHub-Repo (nur Device-Tree): https://github.com/Ben-bit-code208/waipu-twrp
-- Source-Sync läuft mit `repo sync -j4 --no-clone-bundle --fail-fast`
-  (Log: `/mnt/twrp-build/twrp11/repo-sync.log`).
+- Source-Sync abgeschlossen (Log: `/mnt/twrp-build/twrp11/repo-sync.log`).
 
 ## Wichtige Erkenntnisse aus der Stock-Ramdisk
 
@@ -103,9 +106,9 @@ Die dafür nötigen BT-Blobs und Keylayouts liegen bereits unter
 `recovery/root/vendor/...` und `recovery/root/system/usr/keylayout/`
 (nur lokal, nicht für öffentliche XDA-Zips).
 
-## Offene Punkte vor dem Build
+## Offene Punkte nach dem ersten Build
 
-- Source-Sync abschließen (läuft).
+- Build-Skript und Doku auf `mka bootimage` umgestellt (siehe oben).
 - `vendor/twrp/config/common.mk` ist synchronisiert und geprüft.
 - `bootctrl.SEI700WP` existiert nicht – A/B vorerst deaktiviert (siehe oben).
 - `BOARD_SUPER_PARTITION_*`, `PLATFORM_VERSION := 16.1.0` validieren.
@@ -117,9 +120,10 @@ Die dafür nötigen BT-Blobs und Keylayouts liegen bereits unter
 **Nie direkt flashen.** Test immer mit:
 
 ```
-fastboot boot twrp.img
+fastboot boot boot.img
 ```
 
+(`recovery_as_boot`: das gebaute Image ist `boot.img`.)
 Das lädt das Image nur in den RAM. Stock-`boot_a` bleibt unangetastet.
 Vor jedem Flash: bytegleiche Backups von `boot_a` und `vendor_boot_a`
 liegen bereits in `/home/bklumki/fw_dump/`.
