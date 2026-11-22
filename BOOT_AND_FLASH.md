@@ -96,14 +96,21 @@ On the machine that already has the build tree, everything in sections 2 and 3
 can be done by one script (absolute paths, no `cd` needed):
 
 ```bash
-/home/bklumki/waipu-twrp-device-tree/build_image.sh
-# or, if boot.img already exists and only the AVB footer must be reattached:
-/home/bklumki/waipu-twrp-device-tree/build_image.sh --avb-only
+/home/bklumki/waipu-twrp-device-tree/build_image.sh             # build + AVB
+/home/bklumki/waipu-twrp-device-tree/build_image.sh --avb-only  # AVB only
+/home/bklumki/waipu-twrp-device-tree/build_image.sh --flash     # build + AVB + flash
+/home/bklumki/waipu-twrp-device-tree/build_image.sh --flash-only # flash existing image
 ```
 
 The script cleans the ramdisk cache, makes sure `libminuitwrp.so` is registered,
 runs `mka bootimage -j4`, reattaches the AVB footer and prints the resulting
 SHA-256. It also works when started from any directory.
+
+The two flash modes require an ADB connection to a device already running TWRP.
+They show the current slot and image hash, ask for `YES`, back up `boot_a` to
+`/home/bklumki/fw_dump/twrp_images/`, push the image to `/tmp` on the device,
+write it to `boot_a` and verify the hash. Slot `b` and `misc` are never touched.
+The default invocation does **not** flash and does not need a device.
 
 Manual steps, if you prefer to do it yourself:
 
@@ -206,18 +213,29 @@ If the device currently boots Android, temporarily flash the stock `boot.img`
 first (see section 6), boot into Android, then use `adb reboot recovery` only if
 you already have TWRP in `boot_a`.
 
+`build_image.sh --flash` performs exactly these steps with a backup and a
+confirmation prompt. Manual equivalent:
+
 ```bash
 HOST_EPOCH=$(date +%s)
 adb shell "date @$HOST_EPOCH"       # fix the 1970 clock
 
-adb push twrp_SEI700WP_boot_avb.img /data/local/tmp/twrp_new.img
+# Back up first. /data/local/tmp does NOT exist in TWRP - use /tmp.
+adb shell 'dd if=/dev/block/by-name/boot_a of=/tmp/boot_a_backup.img bs=4M status=none'
+adb pull /tmp/boot_a_backup.img ./boot_a_backup.img
 
-adb shell 'dd if=/data/local/tmp/twrp_new.img of=/dev/block/by-name/boot_a bs=4M'
+adb push twrp_SEI700WP_boot_avb.img /tmp/twrp_new.img
+
+adb shell 'dd if=/tmp/twrp_new.img of=/dev/block/by-name/boot_a bs=4M'
 adb shell sync
 
 # Must match the SHA-256 printed by the build step:
 adb shell sha256sum /dev/block/by-name/boot_a
 ```
+
+Do not use `adb exec-out dd ...` for the backup: it merges `dd`'s statistics
+into the data stream and produces a file 82 bytes too long. Use the file + pull
+method above or `status=none`.
 
 Then reboot:
 
@@ -282,8 +300,8 @@ TWRP – that is expected, because TWRP *is* `boot_a`. To boot Android, flash th
 stock image back temporarily:
 
 ```bash
-adb push /home/bklumki/fw_dump/ota/extracted/boot.img /data/local/tmp/stock_boot.img
-adb shell 'dd if=/data/local/tmp/stock_boot.img of=/dev/block/by-name/boot_a bs=4M'
+adb push /home/bklumki/fw_dump/ota/extracted/boot.img /tmp/stock_boot.img
+adb shell 'dd if=/tmp/stock_boot.img of=/dev/block/by-name/boot_a bs=4M'
 adb shell sync
 adb reboot
 ```
